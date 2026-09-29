@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password_hash String
+  role          Role     @default(STAFF)
+}
+
+model Patient {
+  id            Int      @id @default(autoincrement())
+  name          String
+  contact_info  String?
+  
+  appointments  Appointment[]
+}
+
+model Doctor {
+  id            Int      @id @default(autoincrement())
+  name          String
+  specialty     String?
+  department_id Int
+  
+  department    Department @relation(fields: [department_id], references: [id])
+  availabilities DoctorAvailability[]
+  appointments   Appointment[]
+}
+
+model PatientArrival {
+  id            Int      @id @default(autoincrement())
+  timestamp     DateTime @default(now())
+  department_id Int
+  category      String
+  
+  department    Department @relation(fields: [department_id], references: [id])
+}
+
+model Appointment {
+  id            Int      @id @default(autoincrement())
+  datetime      DateTime
+  department_id Int
+  patient_id    Int
+  doctor_id     Int
+  slot          String
+  status        AppointmentStatus @default(SCHEDULED)
+  
+  department    Department @relation(fields: [department_id], references: [id])
+  patient       Patient    @relation(fields: [patient_id], references: [id])
+  doctor        Doctor     @relation(fields: [doctor_id], references: [id])
+}
+
+model DoctorAvailability {
+  id            Int      @id @default(autoincrement())
+  doctor_id     Int
+  department_id Int
+  shift         String
+  start_time    DateTime
+  end_time      DateTime
+  availability  Boolean
+  
+  doctor        Doctor     @relation(fields: [doctor_id], references: [id])
+  department    Department @relation(fields: [department_id], references: [id])
+}
+
+model Bed {
+  id            Int      @id @default(autoincrement())
+  department_id Int
+  status        BedStatus @default(AVAILABLE)
+  
+  department    Department @relation(fields: [department_id], references: [id])
+}
+
+model Queue {
+  id            Int      @id @default(autoincrement())
+  department_id Int
+  timestamp     DateTime @default(now())
+  queue_length  Int
+  
+  department    Department @relation(fields: [department_id], references: [id])
+}
+
+model Department {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  capacity_thresholds Json
+
+  patient_arrivals      PatientArrival[]
+  appointments          Appointment[]
+  doctor_availabilities DoctorAvailability[]
+  doctors               Doctor[]
+  beds                  Bed[]
+  queues                Queue[]
+  predictions           Prediction[]
+  recommendations       Recommendation[]
+  alerts                Alert[]
+}
+
+model Prediction {
+  id              Int      @id @default(autoincrement())
+  created_at      DateTime @default(now())
+  forecast_time   DateTime
+  department_id   Int
+  target_type     String
+  predicted_value Float
+  
+  department      Department @relation(fields: [department_id], references: [id])
+}
+
+model Recommendation {
+  id            Int      @id @default(autoincrement())
+  created_at    DateTime @default(now())
+  resource      String
+  department_id Int
+  time          DateTime
+  action        String
+  status        RecommendationStatus @default(PENDING)
+  
+  department    Department @relation(fields: [department_id], references: [id])
+  alerts        Alert[]
+}
+
+model Alert {
+  id                Int      @id @default(autoincrement())
+  created_at        DateTime @default(now())
+  department_id     Int
+  resource          String
+  threshold         Float
+  predicted_value   Float
+  status            AlertStatus @default(ACTIVE)
+  recommendation_id Int?
+  
+  department        Department @relation(fields: [department_id], references: [id])
+  recommendation    Recommendation? @relation(fields: [recommendation_id], references: [id])
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+enum BedStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum RecommendationStatus {
+  PENDING
+  APPLIED
+  DISMISSED
+}
+
+enum AlertStatus {
+  ACTIVE
+  ACKNOWLEDGED
+}
