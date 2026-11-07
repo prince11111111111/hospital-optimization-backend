@@ -27,7 +27,7 @@ The backend operates as a three-tier microservice Monorepo:
 *   **Tech**: Python, FastAPI, Pandas, Scikit-Learn
 *   **Role**: Reads historical `PatientArrival` data from PostgreSQL, engineers time-based features, and runs Random Forest regressors to forecast expected demand and wait times for specific departments.
 
-### 3. Optimization Service (`/optimization-service`)
+### 3. Optimization Service (`/optimization-service`) [in progress]
 *   **Tech**: Python, FastAPI, Google OR-Tools (CP-SAT Solver)
 *   **Role**: Ingests ML forecasts and maps them against live constraints (available Beds, Doctor shift availabilities). Uses constraint programming to calculate optimal resource reallocations and returns actionable `Recommendations`.
 
