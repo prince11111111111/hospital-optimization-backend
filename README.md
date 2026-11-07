@@ -23,7 +23,7 @@ The backend operates as a three-tier microservice Monorepo:
 *   **Tech**: Node.js, Express, TypeScript, Prisma, PostgreSQL
 *   **Role**: The central nervous system. Handles JWT Authentication, strict Role-Based Access Control (RBAC), data ingestion (walk-in arrivals, queue lengths), CRUD operations for hospital domains, and routing. Exposes all data via a standard REST API.
 
-### 2. ML Prediction Service (`/ml-service`)
+### 2. ML Prediction Service (`/ml-service`) [in progress]
 *   **Tech**: Python, FastAPI, Pandas, Scikit-Learn
 *   **Role**: Reads historical `PatientArrival` data from PostgreSQL, engineers time-based features, and runs Random Forest regressors to forecast expected demand and wait times for specific departments.
 
